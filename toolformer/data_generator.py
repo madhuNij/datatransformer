@@ -223,10 +223,7 @@ class DataGenerator(nn.Module):
         for i, position in enumerate(losses):
             negative_loss = min(losses[position][0], losses[position][1])
             positive_loss = losses[position][2]
-            print("Negative loss:", negative_loss)
-            print("positive loss:", positive_loss)
-            print("Diff:", negative_loss - positive_loss)
-            print("threshold:", self.filtering_threshold)
+            
             if negative_loss - positive_loss >= self.filtering_threshold:
                 # filtered_augmented_text_ids.append(candidates[i])
                 filtered_augmented_text_ids = torch.cat([
@@ -244,7 +241,7 @@ class DataGenerator(nn.Module):
         candidate_ids: TensorType["n_positions", "seq_len"]
     ):
         conditioning_api_ids = self._generate_conditioning_prompts(api, candidate_ids)
-        print("Conditioning apis:", conditioning_api_ids)
+                
         SPACE_TOKEN = self.tokenizer(". ", return_tensors="pt")["input_ids"][0]
         API_LENGTH = 100
         augmented_text_ids = {"api_start_positions": {}}
@@ -296,7 +293,7 @@ class DataGenerator(nn.Module):
             return augmented_text_ids
         
         augmented_text_ids = _normalize_weights(augmented_text_ids)
-        #print("Augmented Text IDS:", augmented_text_ids)     
+                
         def extract_conditioning_ids_and_target_ids(augmented_text_ids):
             conditioning_text_ids = torch.tensor([])
             target_ids = torch.tensor([])
@@ -313,7 +310,7 @@ class DataGenerator(nn.Module):
             return conditioning_text_ids.long(), target_ids.long()
 
         conditioning_text_ids, target_ids = extract_conditioning_ids_and_target_ids(augmented_text_ids)
-        #print("Conditioning IDs and target IDS:", conditioning_text_ids, target_ids)
+            
         output = self.model(input_ids=conditioning_text_ids.long())
         logits = output.logits[:, -1, :]
                     
@@ -355,9 +352,7 @@ class DataGenerator(nn.Module):
             return data
         
         losses = _calculate_loss(augmented_text_ids)
-        #print("Losses:", losses)
         filtered_candidate_ids = self._filter_candidate_by_threshold(losses, candidate_ids)
-        
         return filtered_candidate_ids
     
     def generate(
@@ -373,21 +368,16 @@ class DataGenerator(nn.Module):
         
             # sampling positions
             api_start_idxs, generated_ids = self.sample_api_position(prompt_ids)
-           # print("Indexes:", api_start_idxs, generated_ids)
             
             # obtaining api responses
             candidate_ids = self.obtain_api_response(prompt_ids, api_start_idxs, generated_ids)
-            #print("Candidate IDS:", candidate_ids)
 
             # filtering
             text_ids = self.tokenizer(text, return_tensors="pt")["input_ids"][0]
-            #print("Text IDS:", text_ids)
             
             # return prompt_ids, api_start_idxs, generated_ids, candidate_ids, text_ids
             filtered_candidate_ids = self.filter_api(api, text_ids, api_start_idxs, candidate_ids)
-            print(filtered_candidate_ids)
                     
             filtered_apis = torch.cat([filtered_apis, filtered_candidate_ids.unsqueeze(0)], dim=0)
-            print(filtered_apis)
         
         return filtered_apis.long()
