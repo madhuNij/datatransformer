@@ -65,8 +65,8 @@ Your task is to add calls to a Calendar API to a piece of text. The API calls sh
 You can call the API by writing "[Calendar()]". The API call should help you get information required to complete the text.
 Here are some examples of API calls:
 
-Input: Today is the first Friday of the year.
-Output: Today is the first "[Calendar()]" Friday of the year.
+Input: "Today is the First Thursday of the week"
+Output: "Today is  the first [Calendar()] Thursday of the week."
 
 Input: {input}
 Output: 

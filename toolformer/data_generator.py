@@ -223,7 +223,10 @@ class DataGenerator(nn.Module):
         for i, position in enumerate(losses):
             negative_loss = min(losses[position][0], losses[position][1])
             positive_loss = losses[position][2]
-            
+            print("filtering_threshold",self.filtering_threshold)
+            print("negative_loss",negative_loss)
+            print("positive_loss",positive_loss)
+            print("negative_loss - positive_loss",negative_loss - positive_loss)
             if negative_loss - positive_loss >= self.filtering_threshold:
                 # filtered_augmented_text_ids.append(candidates[i])
                 filtered_augmented_text_ids = torch.cat([
@@ -364,6 +367,7 @@ class DataGenerator(nn.Module):
         for api in self.apis:
             # TODO: add support batch
             prompt = api.prompt_template.format(input=text)
+            #print("prompt",prompt)
             prompt_ids = self.tokenizer(prompt, return_tensors="pt")["input_ids"][0]
         
             # sampling positions
